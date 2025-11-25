@@ -28,7 +28,9 @@ RUN pip install --no-cache --requirement requirements.txt
 
 WORKDIR /root
 
-COPY src/entrypoint.sh src/_version.py ./
+COPY src/entrypoint.sh src/_version.py src/install_extensions.sh ./
+RUN chmod +x ./install_extensions.sh
+
 
 FROM python:${PYTHON_VERSION}-slim AS final-stage
 

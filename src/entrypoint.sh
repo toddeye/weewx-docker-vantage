@@ -48,6 +48,9 @@ EOF
   exit 0
 fi
 
+echo "[INFO] Running dynamic WeeWX extension installer ..."
+/home/weewx/install_extensions.sh ${CONF_FILE}
+
 # if we have any parameters we'll send them to weectl
 
 if [ $# -gt 0 ]; then
