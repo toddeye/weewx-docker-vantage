@@ -6,23 +6,34 @@ set -o pipefail
 
 WEEWX_ROOT="/data"
 CONF_FILE="${WEEWX_ROOT}/weewx.conf"
+SOCAT_TARGET="${SOCAT_TARGET:-host.docker.internal:7000}"
+SOCAT_TTY="${SOCAT_TTY:-/tmp/vtty7000}"
+SOCAT_LOG="${SOCAT_LOG:-/tmp/socat-vtty.log}"
+
 
 # Start socat in the background
-SOCAT_TARGET="${SOCAT_TARGET:-host.docker.internal:7000}"
 echo "Starting socat using target: $SOCAT_TARGET"
-# /usr/bin/socat PTY,link=/tmp/ttyV0,raw,echo=0,mode=666 TCP:weewx.local:7000,forever,interval=5
-socat -d -d pty,raw,echo=0,link=/tmp/ttyV0,perm=666,b19200 tcp:$SOCAT_TARGET,forever,interval=5,retry=30 &
+socat -d -d PTY,link="${SOCAT_TTY}",raw,echo=0,mode=666 TCP:"${SOCAT_TARGET}",forever,interval=5,retry=30 > "${SOCAT_LOG}" 2>&1 &
 SOCAT_PID=$!
 
 # Wait for /tmp/ttyV0 to appear
-echo "Waiting for /tmp/ttyV0..."
+echo "Waiting for ${SOCAT_TTY}..."
 for i in {1..20}; do
-    if [ -e /tmp/ttyV0 ]; then
-        echo "/tmp/ttyV0 is ready."
+    if [ -e "${SOCAT_TTY}" ]; then
+        echo "${SOCAT_TTY} is ready."
         break
     fi
     sleep 2
 done
+
+if [ ! -e "${SOCAT_TTY}" ]; then
+    echo "ERROR: ${SOCAT_TTY} was not created"
+    echo "Last socat log lines:"
+    tail -50 "${SOCAT_LOG}" || true
+    exit 1
+fi
+
+ls -l "${SOCAT_TTY}"
 
 # echo version
 if [ $# -gt 0 ] && [ "$1" = "--version" ]; then
