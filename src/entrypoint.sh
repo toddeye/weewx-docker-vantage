@@ -10,6 +10,13 @@ SOCAT_TARGET="${SOCAT_TARGET:-host.docker.internal:7000}"
 SOCAT_TTY="${SOCAT_TTY:-/tmp/vtty7000}"
 SOCAT_LOG="${SOCAT_LOG:-/tmp/socat-vtty.log}"
 
+echo "Sleeping to allow console to stabilize..."
+sleep 5
+
+for i in {1..3}; do
+  echo -ne "\n" > "${SOCAT_TTY}" || true
+  sleep 1
+done
 
 # Start socat in the background
 echo "Starting socat using target: $SOCAT_TARGET"

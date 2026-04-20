@@ -15,3 +15,4 @@ venv
 
 ## Application Data ##
 data
+my-docker-compose.yml
